@@ -7,7 +7,7 @@ import {
   Award, 
   Briefcase, 
   GraduationCap, 
-  Certificate, 
+  Medal, 
   Languages, 
   MessageSquare, 
   Link,
@@ -54,7 +54,7 @@ const sections = [
   {
     id: 'certifications',
     label: 'Certifications',
-    icon: Certificate,
+    icon: Medal,
     required: false
   },
   {
@@ -78,8 +78,8 @@ const sections = [
 ];
 
 const CVSidebar = ({ activeSection, onSectionChange, cv }: CVSidebarProps) => {
-  const isPersonalInfoComplete = cv.personalInfo.fullNameEng && cv.personalInfo.email;
-  const isSelfIntroComplete = cv.selfIntro.intro && cv.selfIntro.experiences && cv.selfIntro.value && cv.selfIntro.motivation;
+  const isPersonalInfoComplete = !!(cv.personalInfo.fullNameEng && cv.personalInfo.email);
+  const isSelfIntroComplete = !!(cv.selfIntro.intro && cv.selfIntro.experiences && cv.selfIntro.value && cv.selfIntro.motivation);
 
   const getSectionCompletion = (sectionId: string): boolean => {
     switch (sectionId) {
