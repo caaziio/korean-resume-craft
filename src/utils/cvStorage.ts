@@ -1,3 +1,4 @@
+
 import { CV, PersonalInfo, SelfIntroduction } from '@/types/cv';
 
 const CV_STORAGE_KEY = 'acafo_cvs';
@@ -57,6 +58,11 @@ export const loadCV = (id: string): CV | null => {
 export const loadAllCVs = (): { [id: string]: CV } => {
   const storedCvs = localStorage.getItem(CV_STORAGE_KEY);
   return storedCvs ? JSON.parse(storedCvs) : {};
+};
+
+export const loadCVs = (): CV[] => {
+  const cvs = loadAllCVs();
+  return Object.values(cvs);
 };
 
 export const deleteCV = (id: string) => {
