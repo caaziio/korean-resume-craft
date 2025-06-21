@@ -98,7 +98,7 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
                   <Label htmlFor={`start-${experience.id}`}>Start Date</Label>
                   <Input
                     id={`start-${experience.id}`}
-                    type="month"
+                    type="date"
                     value={experience.startDate}
                     onChange={(e) => updateExperience(experience.id, 'startDate', e.target.value)}
                   />
@@ -107,7 +107,7 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
                   <Label htmlFor={`end-${experience.id}`}>End Date</Label>
                   <Input
                     id={`end-${experience.id}`}
-                    type="month"
+                    type="date"
                     value={experience.endDate}
                     onChange={(e) => updateExperience(experience.id, 'endDate', e.target.value)}
                     placeholder="Leave blank for current position"

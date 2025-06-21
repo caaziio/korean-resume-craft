@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Download } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { CV } from '@/types/cv';
 import { loadCV } from '@/utils/cvStorage';
 import { toast } from '@/hooks/use-toast';
@@ -27,6 +28,28 @@ const CVPreview = () => {
       }
     }
   }, [id, navigate]);
+
+  const formatText = (text: string) => {
+    return text.split('\n').map((line, index) => (
+      <span key={index}>
+        {line}
+        {index < text.split('\n').length - 1 && <br />}
+      </span>
+    ));
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long' 
+      });
+    } catch {
+      return dateString;
+    }
+  };
 
   if (!cv) {
     return (
@@ -84,35 +107,68 @@ const CVPreview = () => {
       {/* Preview Content */}
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8">
-          <div className="space-y-6">
-            {/* Personal Info */}
-            <div className="border-b pb-4">
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                {cv.personalInfo.fullNameEng || 'Full Name'}
-              </h2>
-              <div className="grid grid-cols-2 gap-4 text-sm text-slate-600">
-                <p>Email: {cv.personalInfo.email}</p>
-                <p>Phone: {cv.personalInfo.phone}</p>
-                <p>Country: {cv.personalInfo.country}</p>
-                <p>Visa: {cv.personalInfo.visaType}</p>
+          <div className="space-y-8">
+            {/* Header with Photo */}
+            <div className="flex items-start gap-6 border-b pb-6">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                  {cv.personalInfo.fullNameEng || 'Full Name'}
+                  {cv.personalInfo.fullNameKor && (
+                    <span className="text-xl text-slate-600 ml-2 font-korean">
+                      ({cv.personalInfo.fullNameKor})
+                    </span>
+                  )}
+                </h1>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700 mt-4">
+                  {cv.personalInfo.email && (
+                    <div><strong>Email:</strong> {cv.personalInfo.email}</div>
+                  )}
+                  {cv.personalInfo.phone && (
+                    <div><strong>Phone:</strong> {cv.personalInfo.phone}</div>
+                  )}
+                  {cv.personalInfo.address && (
+                    <div><strong>Address:</strong> {cv.personalInfo.address}</div>
+                  )}
+                  {cv.personalInfo.country && (
+                    <div><strong>Country:</strong> {cv.personalInfo.country}</div>
+                  )}
+                  {cv.personalInfo.dob && (
+                    <div><strong>Date of Birth:</strong> {cv.personalInfo.dob}</div>
+                  )}
+                  {cv.personalInfo.visaType && (
+                    <div><strong>Visa:</strong> {cv.personalInfo.visaType}{cv.personalInfo.visaOther && ` - ${cv.personalInfo.visaOther}`}</div>
+                  )}
+                </div>
               </div>
+              
+              {cv.personalInfo.photo && (
+                <div className="flex-shrink-0">
+                  <Avatar className="w-32 h-32">
+                    <AvatarImage src={cv.personalInfo.photo} alt="Profile photo" className="object-cover" />
+                    <AvatarFallback className="text-2xl">
+                      {cv.personalInfo.fullNameEng?.charAt(0) || 'N'}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+              )}
             </div>
 
             {/* Career Summary */}
             {cv.summary && (
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Career Summary</h3>
-                <p className="text-slate-700">{cv.summary}</p>
+                <h2 className="text-xl font-semibold text-slate-900 mb-3 border-b border-slate-200 pb-1">Career Summary</h2>
+                <div className="text-slate-700 leading-relaxed">{formatText(cv.summary)}</div>
               </div>
             )}
 
             {/* Skills */}
             {cv.skills.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Skills</h3>
+                <h2 className="text-xl font-semibold text-slate-900 mb-3 border-b border-slate-200 pb-1">Skills</h2>
                 <div className="flex flex-wrap gap-2">
                   {cv.skills.map((skill, index) => (
-                    <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                    <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                       {skill}
                     </span>
                   ))}
@@ -123,14 +179,144 @@ const CVPreview = () => {
             {/* Work Experience */}
             {cv.experiences.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Work Experience</h3>
-                <div className="space-y-3">
+                <h2 className="text-xl font-semibold text-slate-900 mb-4 border-b border-slate-200 pb-1">Work Experience</h2>
+                <div className="space-y-6">
                   {cv.experiences.map((exp) => (
-                    <div key={exp.id} className="border-l-2 border-blue-200 pl-4">
-                      <h4 className="font-medium text-slate-900">{exp.title}</h4>
-                      <p className="text-slate-600">{exp.company}</p>
-                      <p className="text-sm text-slate-500">{exp.startDate} - {exp.endDate}</p>
-                      <p className="text-slate-700 mt-1">{exp.description}</p>
+                    <div key={exp.id} className="border-l-4 border-blue-200 pl-6">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="text-lg font-semibold text-slate-900">{exp.title}</h3>
+                          <p className="text-blue-700 font-medium">{exp.company}</p>
+                        </div>
+                        <div className="text-sm text-slate-500">
+                          {formatDate(exp.startDate)} - {exp.endDate ? formatDate(exp.endDate) : 'Present'}
+                        </div>
+                      </div>
+                      {exp.description && (
+                        <div className="text-slate-700 leading-relaxed">{formatText(exp.description)}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Education */}
+            {cv.education.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4 border-b border-slate-200 pb-1">Education</h2>
+                <div className="space-y-4">
+                  {cv.education.map((edu) => (
+                    <div key={edu.id} className="border-l-4 border-green-200 pl-6">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="text-lg font-semibold text-slate-900">{edu.degree}</h3>
+                          <p className="text-green-700 font-medium">{edu.school}</p>
+                        </div>
+                        <div className="text-sm text-slate-500">
+                          {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
+                        </div>
+                      </div>
+                      {edu.notes && (
+                        <div className="text-slate-700 leading-relaxed">{formatText(edu.notes)}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Certifications */}
+            {cv.certifications.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4 border-b border-slate-200 pb-1">Certifications</h2>
+                <div className="space-y-4">
+                  {cv.certifications.map((cert) => (
+                    <div key={cert.id} className="border-l-4 border-purple-200 pl-6">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="text-lg font-semibold text-slate-900">{cert.name}</h3>
+                          <p className="text-purple-700 font-medium">{cert.issuer}</p>
+                        </div>
+                        <div className="text-sm text-slate-500">{formatDate(cert.date)}</div>
+                      </div>
+                      {cert.description && (
+                        <div className="text-slate-700 leading-relaxed">{formatText(cert.description)}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Languages */}
+            {cv.languages.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4 border-b border-slate-200 pb-1">Languages</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {cv.languages.map((lang) => (
+                    <div key={lang.id} className="border border-slate-200 rounded-lg p-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-semibold text-slate-900">{lang.language}</h3>
+                        <span className="text-sm font-medium text-slate-600">{lang.proficiency}</span>
+                      </div>
+                      {lang.score && (
+                        <p className="text-sm text-slate-500 mt-1">Score: {lang.score}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Self Introduction */}
+            {(cv.selfIntro.intro || cv.selfIntro.experiences || cv.selfIntro.value || cv.selfIntro.motivation) && (
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4 border-b border-slate-200 pb-1">Self Introduction</h2>
+                <div className="space-y-4">
+                  {cv.selfIntro.intro && (
+                    <div>
+                      <h3 className="font-semibold text-slate-800 mb-2">Introduction</h3>
+                      <div className="text-slate-700 leading-relaxed">{formatText(cv.selfIntro.intro)}</div>
+                    </div>
+                  )}
+                  {cv.selfIntro.experiences && (
+                    <div>
+                      <h3 className="font-semibold text-slate-800 mb-2">Experiences</h3>
+                      <div className="text-slate-700 leading-relaxed">{formatText(cv.selfIntro.experiences)}</div>
+                    </div>
+                  )}
+                  {cv.selfIntro.value && (
+                    <div>
+                      <h3 className="font-semibold text-slate-800 mb-2">Value Proposition</h3>
+                      <div className="text-slate-700 leading-relaxed">{formatText(cv.selfIntro.value)}</div>
+                    </div>
+                  )}
+                  {cv.selfIntro.motivation && (
+                    <div>
+                      <h3 className="font-semibold text-slate-800 mb-2">Motivation</h3>
+                      <div className="text-slate-700 leading-relaxed">{formatText(cv.selfIntro.motivation)}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Portfolio Links */}
+            {cv.portfolioLinks.filter(link => link.trim()).length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900 mb-4 border-b border-slate-200 pb-1">Portfolio & Links</h2>
+                <div className="space-y-2">
+                  {cv.portfolioLinks.filter(link => link.trim()).map((link, index) => (
+                    <div key={index}>
+                      <a 
+                        href={link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 underline break-all"
+                      >
+                        {link}
+                      </a>
                     </div>
                   ))}
                 </div>
