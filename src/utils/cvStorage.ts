@@ -45,19 +45,27 @@ export const createEmptyCV = (name: string): CV => {
 };
 
 export const saveCV = (cv: CV) => {
+  console.log('Saving CV:', cv.id, cv.name);
   const cvs = loadAllCVs();
   cvs[cv.id] = cv;
   localStorage.setItem(CV_STORAGE_KEY, JSON.stringify(cvs));
+  console.log('CV saved successfully');
 };
 
 export const loadCV = (id: string): CV | null => {
+  console.log('Loading CV with ID:', id);
   const cvs = loadAllCVs();
-  return cvs[id] || null;
+  console.log('All CVs in storage:', Object.keys(cvs));
+  const cv = cvs[id];
+  console.log('Found CV:', cv ? cv.name : 'Not found');
+  return cv || null;
 };
 
 export const loadAllCVs = (): { [id: string]: CV } => {
   const storedCvs = localStorage.getItem(CV_STORAGE_KEY);
-  return storedCvs ? JSON.parse(storedCvs) : {};
+  const result = storedCvs ? JSON.parse(storedCvs) : {};
+  console.log('Loading all CVs from storage:', Object.keys(result));
+  return result;
 };
 
 export const loadCVs = (): CV[] => {
