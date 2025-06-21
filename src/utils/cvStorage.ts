@@ -1,4 +1,3 @@
-
 import { CV, PersonalInfo, SelfIntroduction } from '@/types/cv';
 
 const CV_STORAGE_KEY = 'acafo_cvs';
@@ -40,7 +39,8 @@ export const createEmptyCV = (name: string): CV => {
     languages: [],
     selfIntro,
     portfolioLinks: [],
-    selectedTemplate: ''
+    selectedTemplate: '',
+    isKorean: false
   };
 };
 
