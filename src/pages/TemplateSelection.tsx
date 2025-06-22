@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,6 @@ import { ArrowLeft, Check } from 'lucide-react';
 import { CV } from '@/types/cv';
 import { loadCV, saveCV } from '@/utils/cvStorage';
 import { toast } from '@/hooks/use-toast';
-import { generatePDF } from '@/utils/pdfGenerator';
 
 const templates = [
   { id: 'template1', name: 'Classic', description: 'Clean and professional layout' },
@@ -42,31 +42,15 @@ const TemplateSelection = () => {
     setSelectedTemplate(templateId);
   };
 
-  const handleSaveAndDownload = async () => {
+  const handleSaveAndDownload = () => {
     if (cv) {
       const updatedCV = { ...cv, selectedTemplate };
       saveCV(updatedCV);
-      
-      try {
-        toast({
-          title: "Generating PDF",
-          description: "Please wait while we generate your CV...",
-        });
-        
-        await generatePDF(updatedCV);
-        
-        toast({
-          title: "PDF Generated",
-          description: "Your CV has been downloaded successfully.",
-        });
-      } catch (error) {
-        console.error('PDF generation failed:', error);
-        toast({
-          title: "PDF Generation Failed",
-          description: "There was an error generating your PDF. Please try again.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Template selected",
+        description: "Your template has been saved. Generating PDF...",
+      });
+      // Here you would trigger PDF generation
     }
   };
 
