@@ -1,10 +1,11 @@
+
 import { CV, WorkExperience } from '@/types/cv';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Briefcase, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Trash2, Briefcase } from 'lucide-react';
 
 interface WorkExperienceFormProps {
   cv: CV;
@@ -13,15 +14,13 @@ interface WorkExperienceFormProps {
 
 const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
   const addExperience = () => {
-    const maxOrder = cv.experiences.length > 0 ? Math.max(...cv.experiences.map(exp => exp.order || 0)) : 0;
     const newExperience: WorkExperience = {
       id: `exp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       title: '',
       company: '',
       startDate: '',
       endDate: '',
-      description: '',
-      order: maxOrder + 1
+      description: ''
     };
 
     const updatedCV = {
@@ -31,7 +30,7 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
     onChange(updatedCV);
   };
 
-  const updateExperience = (id: string, field: keyof WorkExperience, value: string | number) => {
+  const updateExperience = (id: string, field: keyof WorkExperience, value: string) => {
     const updatedCV = {
       ...cv,
       experiences: cv.experiences.map(exp => 
@@ -49,34 +48,6 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
     onChange(updatedCV);
   };
 
-  const moveExperience = (id: string, direction: 'up' | 'down') => {
-    const sortedExperiences = [...cv.experiences].sort((a, b) => (a.order || 0) - (b.order || 0));
-    const currentIndex = sortedExperiences.findIndex(exp => exp.id === id);
-    
-    if (
-      (direction === 'up' && currentIndex === 0) ||
-      (direction === 'down' && currentIndex === sortedExperiences.length - 1)
-    ) {
-      return;
-    }
-
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    const temp = sortedExperiences[currentIndex].order;
-    sortedExperiences[currentIndex].order = sortedExperiences[newIndex].order;
-    sortedExperiences[newIndex].order = temp;
-
-    const updatedCV = {
-      ...cv,
-      experiences: cv.experiences.map(exp => {
-        const updated = sortedExperiences.find(se => se.id === exp.id);
-        return updated || exp;
-      })
-    };
-    onChange(updatedCV);
-  };
-
-  const sortedExperiences = [...cv.experiences].sort((a, b) => (a.order || 0) - (b.order || 0));
-
   return (
     <div className="space-y-6">
       <div>
@@ -85,7 +56,7 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
       </div>
 
       <div className="space-y-4">
-        {sortedExperiences.map((experience, index) => (
+        {cv.experiences.map((experience, index) => (
           <Card key={experience.id} className="border-slate-200">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
@@ -93,34 +64,14 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
                   <Briefcase className="h-5 w-5 text-blue-600" />
                   Experience {index + 1}
                 </CardTitle>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => moveExperience(experience.id, 'up')}
-                    disabled={index === 0}
-                    className="text-slate-600 hover:text-slate-900"
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => moveExperience(experience.id, 'down')}
-                    disabled={index === sortedExperiences.length - 1}
-                    className="text-slate-600 hover:text-slate-900"
-                  >
-                    <ArrowDown className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeExperience(experience.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeExperience(experience.id)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
