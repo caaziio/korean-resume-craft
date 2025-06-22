@@ -74,7 +74,9 @@ export const loadCVs = (): CV[] => {
 };
 
 export const deleteCV = (id: string) => {
+  console.log('Deleting CV with ID:', id);
   const cvs = loadAllCVs();
   delete cvs[id];
   localStorage.setItem(CV_STORAGE_KEY, JSON.stringify(cvs));
+  console.log('CV deleted successfully');
 };
