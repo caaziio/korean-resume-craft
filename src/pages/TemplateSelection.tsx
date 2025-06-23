@@ -2,12 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { ArrowLeft, Check } from 'lucide-react';
 import { CV } from '@/types/cv';
 import { loadCV, saveCV } from '@/utils/cvStorage';
-import { generatePDF } from '@/utils/pdfGenerator';
 import { toast } from '@/hooks/use-toast';
 
 const templates = [
@@ -23,15 +20,13 @@ const TemplateSelection = () => {
   const navigate = useNavigate();
   const [cv, setCv] = useState<CV | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('template1');
-  const [language, setLanguage] = useState<'en' | 'ko'>('en');
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   useEffect(() => {
     if (id) {
       const loadedCV = loadCV(id);
       if (loadedCV) {
         setCv(loadedCV);
-        setSelectedTemplate(loadedCV.selectedTemplate || 'template1');
+        setSelectedTemplate(loadedCV.selectedTemplate);
       } else {
         toast({
           title: "CV not found",
@@ -47,27 +42,15 @@ const TemplateSelection = () => {
     setSelectedTemplate(templateId);
   };
 
-  const handleSaveAndDownload = async () => {
+  const handleSaveAndDownload = () => {
     if (cv) {
       const updatedCV = { ...cv, selectedTemplate };
       saveCV(updatedCV);
-      
-      setIsGeneratingPDF(true);
-      try {
-        await generatePDF(updatedCV, language);
-        toast({
-          title: "PDF Downloaded",
-          description: "Your CV has been generated and downloaded successfully",
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to generate PDF. Please try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsGeneratingPDF(false);
-      }
+      toast({
+        title: "Template selected",
+        description: "Your template has been saved. Generating PDF...",
+      });
+      // Here you would trigger PDF generation
     }
   };
 
@@ -103,31 +86,13 @@ const TemplateSelection = () => {
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            {/* Language Toggle */}
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="template-language-toggle" className="text-sm font-medium">
-                English
-              </Label>
-              <Switch
-                id="template-language-toggle"
-                checked={language === 'ko'}
-                onCheckedChange={(checked) => setLanguage(checked ? 'ko' : 'en')}
-              />
-              <Label htmlFor="template-language-toggle" className="text-sm font-medium">
-                한국어
-              </Label>
-            </div>
-            
-            <Button
-              onClick={handleSaveAndDownload}
-              disabled={isGeneratingPDF}
-              className="bg-green-600 hover:bg-green-700 text-white"
-              size="sm"
-            >
-              {isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}
-            </Button>
-          </div>
+          <Button
+            onClick={handleSaveAndDownload}
+            className="bg-green-600 hover:bg-green-700 text-white"
+            size="sm"
+          >
+            Download PDF
+          </Button>
         </div>
       </div>
 

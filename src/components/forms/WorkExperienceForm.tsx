@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Briefcase, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Briefcase } from 'lucide-react';
 
 interface WorkExperienceFormProps {
   cv: CV;
@@ -48,21 +48,6 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
     onChange(updatedCV);
   };
 
-  const moveExperience = (index: number, direction: 'up' | 'down') => {
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= cv.experiences.length) return;
-
-    const updatedExperiences = [...cv.experiences];
-    const [movedItem] = updatedExperiences.splice(index, 1);
-    updatedExperiences.splice(newIndex, 0, movedItem);
-
-    const updatedCV = {
-      ...cv,
-      experiences: updatedExperiences
-    };
-    onChange(updatedCV);
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -72,46 +57,21 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
 
       <div className="space-y-4">
         {cv.experiences.map((experience, index) => (
-          <Card key={experience.id} className="border-slate-200 relative">
+          <Card key={experience.id} className="border-slate-200">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <CardTitle className="text-lg flex items-center gap-2">
                   <Briefcase className="h-5 w-5 text-blue-600" />
-                  <CardTitle className="text-lg">Experience {index + 1}</CardTitle>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* Reorder buttons */}
-                  <div className="flex flex-col gap-1">
-                    {index > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => moveExperience(index, 'up')}
-                        className="h-8 w-8 p-0 hover:bg-blue-100"
-                      >
-                        <ChevronUp className="h-4 w-4" />
-                      </Button>
-                    )}
-                    {index < cv.experiences.length - 1 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => moveExperience(index, 'down')}
-                        className="h-8 w-8 p-0 hover:bg-blue-100"
-                      >
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeExperience(experience.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                  Experience {index + 1}
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeExperience(experience.id)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -138,7 +98,7 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
                   <Label htmlFor={`start-${experience.id}`}>Start Date</Label>
                   <Input
                     id={`start-${experience.id}`}
-                    type="date"
+                    type="month"
                     value={experience.startDate}
                     onChange={(e) => updateExperience(experience.id, 'startDate', e.target.value)}
                   />
@@ -147,7 +107,7 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
                   <Label htmlFor={`end-${experience.id}`}>End Date</Label>
                   <Input
                     id={`end-${experience.id}`}
-                    type="date"
+                    type="month"
                     value={experience.endDate}
                     onChange={(e) => updateExperience(experience.id, 'endDate', e.target.value)}
                     placeholder="Leave blank for current position"

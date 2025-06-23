@@ -1,3 +1,4 @@
+
 export interface PersonalInfo {
   fullNameKor: string;
   fullNameEng: string;
@@ -8,7 +9,6 @@ export interface PersonalInfo {
   address: string;
   visaType: string;
   visaOther: string;
-  photo: string;
 }
 
 export interface WorkExperience {
