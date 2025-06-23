@@ -1,182 +1,138 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Plus, FileText, Calendar, Trash2 } from 'lucide-react';
-import { CV } from '@/types/cv';
-import { loadCVs, createEmptyCV, saveCV, deleteCV } from '@/utils/cvStorage';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, FileText, User, Mail, Briefcase, Edit, Eye, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { loadCVs, saveCVs, createEmptyCV, deleteCV } from '@/utils/cvStorage';
 
 const Index = () => {
-  const [cvs, setCvs] = useState<CV[]>([]);
-  const [newCVName, setNewCVName] = useState('');
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const [cvs, setCvs] = useState<any[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newCVName, setNewCVName] = useState('');
 
   useEffect(() => {
     setCvs(loadCVs());
   }, []);
 
   const handleCreateCV = () => {
-    if (!newCVName.trim()) {
+    if (newCVName.trim() !== '') {
+      const newCV = createEmptyCV(newCVName);
+      const updatedCVs = [...cvs, newCV];
+      saveCVs(updatedCVs);
+      setCvs(updatedCVs);
+      setIsDialogOpen(false);
+      setNewCVName('');
+      navigate(`/cv/${newCV.id}`);
+    } else {
       toast({
-        title: "Name required",
-        description: "Please enter a name for your CV",
+        title: "Error",
+        description: "CV name cannot be empty",
         variant: "destructive"
       });
-      return;
     }
-
-    const newCV = createEmptyCV(newCVName.trim());
-    saveCV(newCV);
-    setCvs(loadCVs());
-    setNewCVName('');
-    setIsCreateDialogOpen(false);
-    
-    toast({
-      title: "CV Created",
-      description: `"${newCV.name}" has been created successfully`
-    });
-    
-    navigate(`/cv/${newCV.id}`);
   };
 
-  const handleDeleteCV = (cv: CV) => {
-    deleteCV(cv.id);
-    setCvs(loadCVs());
-    toast({
-      title: "CV Deleted",
-      description: `"${cv.name}" has been deleted`
-    });
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+  const handleDeleteCV = (cvId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (confirm('Are you sure you want to delete this CV?')) {
+      deleteCV(cvId);
+      setCvs(loadCVs());
+      toast({
+        title: "CV deleted",
+        description: "Your CV has been deleted successfully"
+      });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 font-korean">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            ACAFO Korean CV Builder
-          </h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            Create professional Korean-style resumes tailored for the Korean job market
-          </p>
+    <div className="min-h-screen bg-slate-50 font-korean">
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200 px-6 py-4">
+        <div className="flex items-center justify-between max-w-6xl mx-auto">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">ACAFO CV Builder</h1>
+            <p className="text-slate-600">Create professional CVs tailored for the Korean job market</p>
+          </div>
+          <Button onClick={() => setIsDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Plus className="h-4 w-4 mr-2" />
+            Create New CV
+          </Button>
         </div>
+      </div>
 
-        {/* Create New CV Button */}
-        <div className="flex justify-center mb-8">
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
-                <Plus className="mr-2 h-5 w-5" />
-                Create New CV
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create New CV</DialogTitle>
-                <DialogDescription>
-                  Enter a name for your new CV (e.g., "Samsung Application", "Teaching Position")
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="cv-name">CV Name</Label>
-                  <Input
-                    id="cv-name"
-                    value={newCVName}
-                    onChange={(e) => setNewCVName(e.target.value)}
-                    placeholder="Enter CV name..."
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleCreateCV();
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreateCV}>Create CV</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* CV List */}
-        {cvs.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+      {/* CV Grid */}
+      <div className="max-w-6xl mx-auto p-6">
+        {cvs.length === 0 ? (
+          <div className="text-center py-12">
+            <FileText className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-slate-700 mb-2">No CVs created yet</h2>
+            <p className="text-slate-500 mb-6 max-w-md mx-auto">
+              Get started by creating your first professional CV. Our builder will guide you through each section.
+            </p>
+            <Button onClick={() => setIsDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Your First CV
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cvs.map((cv) => (
-              <Card key={cv.id} className="group hover:shadow-lg transition-all duration-200 border-slate-200 hover:border-blue-300">
+              <Card key={cv.id} className="hover:shadow-md transition-shadow cursor-pointer">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
+                    <div onClick={() => navigate(`/cv/${cv.id}`)} className="flex-1">
+                      <CardTitle className="text-lg font-semibold text-slate-900 mb-1">
                         {cv.name}
                       </CardTitle>
-                      <CardDescription className="text-sm text-slate-500 mt-1">
-                        Created {formatDate(cv.createdAt)}
-                      </CardDescription>
+                      <p className="text-sm text-slate-500">
+                        Last updated: {new Date(cv.updatedAt).toLocaleDateString()}
+                      </p>
                     </div>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity p-2 h-8 w-8 hover:bg-red-50 hover:text-red-600">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete CV</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete "{cv.name}"? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={() => handleDeleteCV(cv)}
-                            className="bg-red-600 hover:bg-red-700"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleDeleteCV(cv.id, e)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 ml-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center text-sm text-slate-600 mb-4">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Updated {formatDate(cv.updatedAt)}
+                <CardContent onClick={() => navigate(`/cv/${cv.id}`)} className="pt-0">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-slate-600">
+                      <User className="h-4 w-4 mr-2" />
+                      {cv.personalInfo.fullNameEng || 'No name set'}
+                    </div>
+                    <div className="flex items-center text-sm text-slate-600">
+                      <Mail className="h-4 w-4 mr-2" />
+                      {cv.personalInfo.email || 'No email set'}
+                    </div>
+                    <div className="flex items-center text-sm text-slate-600">
+                      <Briefcase className="h-4 w-4 mr-2" />
+                      {cv.experiences.length} work experience(s)
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => navigate(`/cv/${cv.id}`)}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
+                  
+                  <div className="mt-4 flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
                     <Button 
-                      onClick={() => navigate(`/cv/${cv.id}/preview`)}
-                      variant="outline"
-                      className="flex-1 border-blue-200 text-blue-700 hover:bg-blue-50"
+                      variant="outline" 
+                      size="sm" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/cv/${cv.id}/preview`);
+                      }}
                     >
+                      <Eye className="h-4 w-4 mr-1" />
                       Preview
                     </Button>
                   </div>
@@ -184,49 +140,36 @@ const Index = () => {
               </Card>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-              <FileText className="h-12 w-12 text-slate-400" />
+        )}
+      </div>
+
+      {/* Create CV Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New CV</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                CV Name
+              </Label>
+              <Input
+                type="text"
+                id="name"
+                value={newCVName}
+                onChange={(e) => setNewCVName(e.target.value)}
+                className="col-span-3"
+              />
             </div>
-            <h3 className="text-xl font-semibold text-slate-700 mb-2">No CVs yet</h3>
-            <p className="text-slate-500 mb-6">Create your first Korean-style resume to get started</p>
-            <Button 
-              onClick={() => setIsCreateDialogOpen(true)}
-              variant="outline" 
-              className="border-blue-200 text-blue-700 hover:bg-blue-50"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Create Your First CV
+          </div>
+          <div className="flex justify-end">
+            <Button type="submit" onClick={handleCreateCV}>
+              Create CV
             </Button>
           </div>
-        )}
-
-        {/* Features */}
-        <div className="mt-20 grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <FileText className="h-8 w-8 text-blue-600" />
-            </div>
-            <h3 className="font-semibold text-slate-900 mb-2">Korean Format</h3>
-            <p className="text-sm text-slate-600">Professional layouts following Korean resume standards</p>
-          </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Plus className="h-8 w-8 text-green-600" />
-            </div>
-            <h3 className="font-semibold text-slate-900 mb-2">Easy to Use</h3>
-            <p className="text-sm text-slate-600">Step-by-step form with guidance for each section</p>
-          </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Calendar className="h-8 w-8 text-purple-600" />
-            </div>
-            <h3 className="font-semibold text-slate-900 mb-2">Export Ready</h3>
-            <p className="text-sm text-slate-600">Download as professional A4 PDF for applications</p>
-          </div>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

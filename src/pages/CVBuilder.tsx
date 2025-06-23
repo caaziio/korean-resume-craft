@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,7 @@ import CertificationsForm from '@/components/forms/CertificationsForm';
 import LanguagesForm from '@/components/forms/LanguagesForm';
 import SelfIntroductionForm from '@/components/forms/SelfIntroductionForm';
 import PortfolioLinksForm from '@/components/forms/PortfolioLinksForm';
+import LanguageToggle from '@/components/LanguageToggle';
 
 const CVBuilder = () => {
   const { id } = useParams<{ id: string }>();
@@ -107,17 +107,22 @@ const CVBuilder = () => {
               className="text-slate-600 hover:text-slate-900"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to CVs
+              {cv?.language === 'korean' ? '이력서 목록으로' : 'Back to CVs'}
             </Button>
             <div>
-              <h1 className="text-xl font-semibold text-slate-900">{cv.name}</h1>
-              <p className="text-sm text-slate-500">Edit your CV details</p>
+              <h1 className="text-xl font-semibold text-slate-900">{cv?.name}</h1>
+              <p className="text-sm text-slate-500">
+                {cv?.language === 'korean' ? '이력서 세부사항 편집' : 'Edit your CV details'}
+              </p>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
+            {cv && <LanguageToggle cv={cv} onChange={handleCVChange} />}
             {hasUnsavedChanges && (
-              <span className="text-sm text-amber-600 font-medium">Unsaved changes</span>
+              <span className="text-sm text-amber-600 font-medium">
+                {cv?.language === 'korean' ? '저장되지 않은 변경사항' : 'Unsaved changes'}
+              </span>
             )}
             <Button
               onClick={handleSave}
@@ -126,15 +131,15 @@ const CVBuilder = () => {
               className="border-green-200 text-green-700 hover:bg-green-50"
             >
               <Save className="h-4 w-4 mr-2" />
-              Save
+              {cv?.language === 'korean' ? '저장' : 'Save'}
             </Button>
             <Button
-              onClick={() => navigate(`/cv/${cv.id}/preview`)}
+              onClick={() => navigate(`/cv/${cv?.id}/preview`)}
               className="bg-blue-600 hover:bg-blue-700 text-white"
               size="sm"
             >
               <Eye className="h-4 w-4 mr-2" />
-              Preview
+              {cv?.language === 'korean' ? '미리보기' : 'Preview'}
             </Button>
           </div>
         </div>

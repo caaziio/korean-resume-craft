@@ -3,6 +3,9 @@ import { CV, VISA_TYPES } from '@/types/cv';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Upload, X } from 'lucide-react';
+import { useRef } from 'react';
 
 interface PersonalInfoFormProps {
   cv: CV;
@@ -10,6 +13,8 @@ interface PersonalInfoFormProps {
 }
 
 const PersonalInfoForm = ({ cv, onChange }: PersonalInfoFormProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const updatePersonalInfo = (field: string, value: string) => {
     const updatedCV = {
       ...cv,
@@ -21,11 +26,75 @@ const PersonalInfoForm = ({ cv, onChange }: PersonalInfoFormProps) => {
     onChange(updatedCV);
   };
 
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const photoData = e.target?.result as string;
+        updatePersonalInfo('photo', photoData);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removePhoto = () => {
+    updatePersonalInfo('photo', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Personal Information</h2>
         <p className="text-slate-600">Enter your basic personal details as they should appear on your resume.</p>
+      </div>
+
+      {/* Photo Upload Section */}
+      <div className="space-y-4">
+        <Label>Profile Photo</Label>
+        <div className="flex items-center gap-4">
+          {cv.personalInfo.photo ? (
+            <div className="relative">
+              <img
+                src={cv.personalInfo.photo}
+                alt="Profile"
+                className="w-24 h-24 object-cover rounded-lg border border-slate-200"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={removePhoto}
+                className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          ) : (
+            <div className="w-24 h-24 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center">
+              <Upload className="h-6 w-6 text-slate-400" />
+            </div>
+          )}
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              className="hidden"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {cv.personalInfo.photo ? 'Change Photo' : 'Upload Photo'}
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -51,12 +120,12 @@ const PersonalInfoForm = ({ cv, onChange }: PersonalInfoFormProps) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="dob">Date of Birth / Age</Label>
+          <Label htmlFor="dob">Date of Birth</Label>
           <Input
             id="dob"
+            type="date"
             value={cv.personalInfo.dob}
             onChange={(e) => updatePersonalInfo('dob', e.target.value)}
-            placeholder="1990.01.01 (33세)"
           />
         </div>
 
@@ -91,13 +160,13 @@ const PersonalInfoForm = ({ cv, onChange }: PersonalInfoFormProps) => {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="address">Address (District only)</Label>
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="address">Address</Label>
           <Input
             id="address"
             value={cv.personalInfo.address}
             onChange={(e) => updatePersonalInfo('address', e.target.value)}
-            placeholder="Gangnam-gu, Seoul"
+            placeholder="123 Main Street, Gangnam-gu, Seoul, South Korea"
           />
         </div>
 
@@ -118,7 +187,7 @@ const PersonalInfoForm = ({ cv, onChange }: PersonalInfoFormProps) => {
         </div>
 
         {cv.personalInfo.visaType === 'Other' && (
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-2">
             <Label htmlFor="visaOther">Other Visa Type</Label>
             <Input
               id="visaOther"

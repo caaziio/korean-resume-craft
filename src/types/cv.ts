@@ -1,4 +1,3 @@
-
 export interface PersonalInfo {
   fullNameKor: string;
   fullNameEng: string;
@@ -9,6 +8,7 @@ export interface PersonalInfo {
   address: string;
   visaType: string;
   visaOther: string;
+  photo: string;
 }
 
 export interface WorkExperience {
@@ -66,6 +66,7 @@ export interface CV {
   selfIntro: SelfIntroduction;
   portfolioLinks: string[];
   selectedTemplate: string;
+  language: 'korean' | 'english';
 }
 
 export const VISA_TYPES = [

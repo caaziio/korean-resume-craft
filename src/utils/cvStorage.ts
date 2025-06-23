@@ -37,7 +37,8 @@ export const createEmptyCV = (name: string): CV => {
       email: '',
       address: '',
       visaType: '',
-      visaOther: ''
+      visaOther: '',
+      photo: ''
     },
     summary: '',
     skills: [],
@@ -52,7 +53,8 @@ export const createEmptyCV = (name: string): CV => {
       motivation: ''
     },
     portfolioLinks: [],
-    selectedTemplate: 'template1'
+    selectedTemplate: 'template1',
+    language: 'english'
   };
 };
 

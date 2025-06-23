@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Briefcase } from 'lucide-react';
+import { Plus, Trash2, Briefcase, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface WorkExperienceFormProps {
   cv: CV;
@@ -48,6 +48,21 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
     onChange(updatedCV);
   };
 
+  const moveExperience = (index: number, direction: 'up' | 'down') => {
+    const newExperiences = [...cv.experiences];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (targetIndex >= 0 && targetIndex < newExperiences.length) {
+      [newExperiences[index], newExperiences[targetIndex]] = [newExperiences[targetIndex], newExperiences[index]];
+      
+      const updatedCV = {
+        ...cv,
+        experiences: newExperiences
+      };
+      onChange(updatedCV);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -64,14 +79,34 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
                   <Briefcase className="h-5 w-5 text-blue-600" />
                   Experience {index + 1}
                 </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeExperience(experience.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => moveExperience(index, 'up')}
+                    disabled={index === 0}
+                    className="text-slate-600 hover:text-slate-900"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => moveExperience(index, 'down')}
+                    disabled={index === cv.experiences.length - 1}
+                    className="text-slate-600 hover:text-slate-900"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeExperience(experience.id)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -98,7 +133,7 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
                   <Label htmlFor={`start-${experience.id}`}>Start Date</Label>
                   <Input
                     id={`start-${experience.id}`}
-                    type="month"
+                    type="date"
                     value={experience.startDate}
                     onChange={(e) => updateExperience(experience.id, 'startDate', e.target.value)}
                   />
@@ -107,7 +142,7 @@ const WorkExperienceForm = ({ cv, onChange }: WorkExperienceFormProps) => {
                   <Label htmlFor={`end-${experience.id}`}>End Date</Label>
                   <Input
                     id={`end-${experience.id}`}
-                    type="month"
+                    type="date"
                     value={experience.endDate}
                     onChange={(e) => updateExperience(experience.id, 'endDate', e.target.value)}
                     placeholder="Leave blank for current position"
