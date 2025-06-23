@@ -7,6 +7,11 @@ export const generatePDF = async (cv: CV, language: 'en' | 'ko') => {
   try {
     console.log('Starting PDF generation for CV:', cv.name);
     
+    // Check if jsPDF is available
+    if (!jsPDF) {
+      throw new Error('jsPDF library not available');
+    }
+    
     // Create a temporary container for the CV content
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'absolute';
@@ -16,17 +21,24 @@ export const generatePDF = async (cv: CV, language: 'en' | 'ko') => {
     tempContainer.style.backgroundColor = 'white';
     tempContainer.style.padding = '20mm';
     tempContainer.style.fontFamily = 'Arial, sans-serif';
+    tempContainer.style.fontSize = '14px';
+    tempContainer.style.lineHeight = '1.6';
     
     // Generate HTML content for PDF
     const htmlContent = generateCVHTML(cv, language);
     tempContainer.innerHTML = htmlContent;
     document.body.appendChild(tempContainer);
     
+    // Wait a bit for fonts to load
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     // Generate canvas from HTML
     const canvas = await html2canvas(tempContainer, {
       scale: 2,
       useCORS: true,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      width: tempContainer.scrollWidth,
+      height: tempContainer.scrollHeight
     });
     
     // Remove temporary container
@@ -54,12 +66,57 @@ export const generatePDF = async (cv: CV, language: 'en' | 'ko') => {
     }
     
     // Download the PDF
-    const fileName = `${cv.name.replace(/[^a-z0-9]/gi, '_')}_CV.pdf`;
+    const fileName = `${cv.name.replace(/[^a-z0-9]/gi, '_')}_CV_${language}.pdf`;
     pdf.save(fileName);
     console.log('PDF generated successfully:', fileName);
+    
+    return { success: true, fileName };
   } catch (error) {
     console.error('Error generating PDF:', error);
-    throw new Error('Failed to generate PDF');
+    
+    // Fallback: try browser's print functionality
+    console.log('Attempting fallback PDF generation using browser print...');
+    try {
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        const htmlContent = generateCVHTML(cv, language);
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>${cv.name} CV</title>
+              <style>
+                body { 
+                  font-family: Arial, sans-serif; 
+                  margin: 20mm; 
+                  font-size: 14px; 
+                  line-height: 1.6; 
+                }
+                @media print {
+                  body { margin: 0; }
+                  .no-print { display: none; }
+                }
+              </style>
+            </head>
+            <body>
+              ${htmlContent}
+              <script>
+                window.onload = function() {
+                  window.print();
+                  setTimeout(() => window.close(), 1000);
+                };
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        return { success: true, fileName: 'CV_printed', fallback: true };
+      }
+    } catch (fallbackError) {
+      console.error('Fallback PDF generation also failed:', fallbackError);
+    }
+    
+    throw new Error('Failed to generate PDF. Please try again or use your browser\'s print function.');
   }
 };
 
