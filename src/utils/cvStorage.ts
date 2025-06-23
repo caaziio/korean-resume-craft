@@ -46,6 +46,7 @@ export const createEmptyCV = (name: string): CV => {
 
 export const saveCV = (cv: CV) => {
   console.log('Saving CV:', cv.id, cv.name);
+  cv.updatedAt = new Date().toISOString();
   const cvs = loadAllCVs();
   cvs[cv.id] = cv;
   localStorage.setItem(CV_STORAGE_KEY, JSON.stringify(cvs));
@@ -74,7 +75,35 @@ export const loadCVs = (): CV[] => {
 };
 
 export const deleteCV = (id: string) => {
+  console.log('Deleting CV with ID:', id);
   const cvs = loadAllCVs();
   delete cvs[id];
   localStorage.setItem(CV_STORAGE_KEY, JSON.stringify(cvs));
+  console.log('CV deleted successfully');
+};
+
+// Add reorder functions for experiences
+export const reorderExperiences = (cv: CV, fromIndex: number, toIndex: number): CV => {
+  const updatedExperiences = [...cv.experiences];
+  const [movedItem] = updatedExperiences.splice(fromIndex, 1);
+  updatedExperiences.splice(toIndex, 0, movedItem);
+  
+  return {
+    ...cv,
+    experiences: updatedExperiences,
+    updatedAt: new Date().toISOString()
+  };
+};
+
+// Add reorder functions for education
+export const reorderEducation = (cv: CV, fromIndex: number, toIndex: number): CV => {
+  const updatedEducation = [...cv.education];
+  const [movedItem] = updatedEducation.splice(fromIndex, 1);
+  updatedEducation.splice(toIndex, 0, movedItem);
+  
+  return {
+    ...cv,
+    education: updatedEducation,
+    updatedAt: new Date().toISOString()
+  };
 };
