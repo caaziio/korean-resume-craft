@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Download } from 'lucide-react';
 import { CV } from '@/types/cv';
 import { loadCV, saveCV } from '@/utils/cvStorage';
 import { toast } from '@/hooks/use-toast';
@@ -13,6 +13,7 @@ const TemplateSelection = () => {
   const navigate = useNavigate();
   const [cv, setCv] = useState<CV | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('template1');
+  const [showPreview, setShowPreview] = useState<boolean>(false);
 
   useEffect(() => {
     if (id) {
@@ -33,6 +34,7 @@ const TemplateSelection = () => {
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
+    setShowPreview(true);
   };
 
   const handleSaveAndDownload = () => {
@@ -111,6 +113,70 @@ const TemplateSelection = () => {
     }
   };
 
+  const renderFullTemplate = () => {
+    if (selectedTemplate === 'korean') {
+      return <KoreanTemplate cv={cv} />;
+    } else {
+      return (
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <h3 className="text-2xl font-semibold text-slate-900 mb-4">
+            {templates.find(t => t.id === selectedTemplate)?.name}
+          </h3>
+          <p className="text-slate-600">
+            {isKorean ? '이 템플릿은 아직 구현되지 않았습니다.' : 'This template is not yet implemented.'}
+          </p>
+        </div>
+      );
+    }
+  };
+
+  if (showPreview) {
+    return (
+      <div className="min-h-screen bg-slate-50 font-korean">
+        {/* Fixed Header */}
+        <div className="bg-white border-b border-slate-200 px-6 py-4 fixed top-0 left-0 right-0 z-10">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPreview(false)}
+                className="text-slate-600 hover:text-slate-900"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                {isKorean ? '템플릿 선택으로 돌아가기' : 'Back to Templates'}
+              </Button>
+              <div>
+                <h1 className="text-xl font-semibold text-slate-900">
+                  {templates.find(t => t.id === selectedTemplate)?.name} {isKorean ? '미리보기' : 'Preview'}
+                </h1>
+                <p className="text-sm text-slate-500">
+                  {isKorean ? '선택한 템플릿으로 생성된 CV입니다' : 'Your CV with the selected template'}
+                </p>
+              </div>
+            </div>
+            
+            <Button
+              onClick={handleSaveAndDownload}
+              className="bg-green-600 hover:bg-green-700 text-white"
+              size="sm"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isKorean ? 'PDF 다운로드' : 'Download PDF'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Template Preview */}
+        <div className="pt-24 pb-8">
+          <div className="max-w-4xl mx-auto p-6">
+            {renderFullTemplate()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 font-korean">
       {/* Fixed Header */}
@@ -135,14 +201,6 @@ const TemplateSelection = () => {
               </p>
             </div>
           </div>
-          
-          <Button
-            onClick={handleSaveAndDownload}
-            className="bg-green-600 hover:bg-green-700 text-white"
-            size="sm"
-          >
-            {isKorean ? 'PDF 다운로드' : 'Download PDF'}
-          </Button>
         </div>
       </div>
 
@@ -170,18 +228,6 @@ const TemplateSelection = () => {
             </div>
           ))}
         </div>
-
-        {/* Template Preview Section */}
-        {selectedTemplate === 'korean' && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-semibold text-slate-900 mb-4">
-              {isKorean ? '선택된 템플릿 미리보기' : 'Selected Template Preview'}
-            </h2>
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <KoreanTemplate cv={cv} />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
