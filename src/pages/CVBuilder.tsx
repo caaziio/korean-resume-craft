@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -45,8 +46,8 @@ const CVBuilder = () => {
       saveCV(cv);
       setHasUnsavedChanges(false);
       toast({
-        title: "Saved",
-        description: "Your CV has been saved successfully"
+        title: cv.language === 'korean' ? "저장됨" : "Saved",
+        description: cv.language === 'korean' ? "CV가 성공적으로 저장되었습니다" : "Your CV has been saved successfully"
       });
     }
   };
@@ -95,9 +96,9 @@ const CVBuilder = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-korean">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4">
+    <div className="min-h-screen bg-slate-50 font-korean flex flex-col">
+      {/* Fixed Header */}
+      <div className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <Button
@@ -146,13 +147,13 @@ const CVBuilder = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex max-w-7xl mx-auto">
+      <div className="flex flex-1 max-w-7xl mx-auto w-full">
         <CVSidebar 
           activeSection={activeSection} 
           onSectionChange={setActiveSection}
           cv={cv}
         />
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-6 overflow-auto">
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
             {renderActiveForm()}
           </div>

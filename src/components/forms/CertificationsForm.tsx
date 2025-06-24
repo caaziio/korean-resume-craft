@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { CV, Certification } from '@/types/cv';
 
 interface CertificationsFormProps {
@@ -42,6 +42,17 @@ const CertificationsForm = ({ cv, onChange }: CertificationsFormProps) => {
     onChange({ ...cv, certifications: updatedCertifications });
   };
 
+  const moveCertification = (index: number, direction: 'up' | 'down') => {
+    const newCertifications = [...certifications];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (targetIndex >= 0 && targetIndex < newCertifications.length) {
+      [newCertifications[index], newCertifications[targetIndex]] = [newCertifications[targetIndex], newCertifications[index]];
+      setCertifications(newCertifications);
+      onChange({ ...cv, certifications: newCertifications });
+    }
+  };
+
   const isKorean = cv.language === 'korean';
 
   return (
@@ -56,20 +67,40 @@ const CertificationsForm = ({ cv, onChange }: CertificationsFormProps) => {
       </div>
 
       <div className="space-y-6">
-        {certifications.map((cert) => (
+        {certifications.map((cert, index) => (
           <div key={cert.id} className="border border-slate-200 rounded-lg p-4 space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-medium text-slate-900">
-                {isKorean ? '자격증' : 'Certification'}
+                {isKorean ? '자격증' : 'Certification'} {index + 1}
               </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => removeCertification(cert.id)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => moveCertification(index, 'up')}
+                  disabled={index === 0}
+                  className="text-slate-600 hover:text-slate-900"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => moveCertification(index, 'down')}
+                  disabled={index === certifications.length - 1}
+                  className="text-slate-600 hover:text-slate-900"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeCertification(cert.id)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

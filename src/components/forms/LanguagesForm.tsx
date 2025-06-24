@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { CV, Language, PROFICIENCY_LEVELS } from '@/types/cv';
 
 interface LanguagesFormProps {
@@ -41,6 +41,17 @@ const LanguagesForm = ({ cv, onChange }: LanguagesFormProps) => {
     onChange({ ...cv, languages: updatedLanguages });
   };
 
+  const moveLanguage = (index: number, direction: 'up' | 'down') => {
+    const newLanguages = [...languages];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (targetIndex >= 0 && targetIndex < newLanguages.length) {
+      [newLanguages[index], newLanguages[targetIndex]] = [newLanguages[targetIndex], newLanguages[index]];
+      setLanguages(newLanguages);
+      onChange({ ...cv, languages: newLanguages });
+    }
+  };
+
   const isKorean = cv.language === 'korean';
 
   return (
@@ -55,20 +66,40 @@ const LanguagesForm = ({ cv, onChange }: LanguagesFormProps) => {
       </div>
 
       <div className="space-y-6">
-        {languages.map((lang) => (
+        {languages.map((lang, index) => (
           <div key={lang.id} className="border border-slate-200 rounded-lg p-4 space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-medium text-slate-900">
-                {isKorean ? '언어' : 'Language'}
+                {isKorean ? '언어' : 'Language'} {index + 1}
               </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => removeLanguage(lang.id)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => moveLanguage(index, 'up')}
+                  disabled={index === 0}
+                  className="text-slate-600 hover:text-slate-900"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => moveLanguage(index, 'down')}
+                  disabled={index === languages.length - 1}
+                  className="text-slate-600 hover:text-slate-900"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => removeLanguage(lang.id)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

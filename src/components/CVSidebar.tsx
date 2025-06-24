@@ -20,64 +20,66 @@ interface CVSidebarProps {
   cv: CV;
 }
 
-const sections = [
-  {
-    id: 'personal-info',
-    label: 'Personal Info',
-    icon: User,
-    required: true
-  },
-  {
-    id: 'career-summary',
-    label: 'Career Summary',
-    icon: FileText,
-    required: false
-  },
-  {
-    id: 'skills',
-    label: 'Skills',
-    icon: Award,
-    required: false
-  },
-  {
-    id: 'work-experience',
-    label: 'Work Experience',
-    icon: Briefcase,
-    required: false
-  },
-  {
-    id: 'education',
-    label: 'Education',
-    icon: GraduationCap,
-    required: false
-  },
-  {
-    id: 'certifications',
-    label: 'Certifications',
-    icon: Medal,
-    required: false
-  },
-  {
-    id: 'languages',
-    label: 'Languages',
-    icon: Languages,
-    required: false
-  },
-  {
-    id: 'self-introduction',
-    label: 'Self Introduction',
-    icon: MessageSquare,
-    required: true
-  },
-  {
-    id: 'portfolio-links',
-    label: 'Portfolio Links',
-    icon: Link,
-    required: false
-  }
-];
-
 const CVSidebar = ({ activeSection, onSectionChange, cv }: CVSidebarProps) => {
+  const isKorean = cv.language === 'korean';
+
+  const sections = [
+    {
+      id: 'personal-info',
+      label: isKorean ? '개인정보' : 'Personal Info',
+      icon: User,
+      required: true
+    },
+    {
+      id: 'career-summary',
+      label: isKorean ? '경력 요약' : 'Career Summary',
+      icon: FileText,
+      required: false
+    },
+    {
+      id: 'skills',
+      label: isKorean ? '기술' : 'Skills',
+      icon: Award,
+      required: false
+    },
+    {
+      id: 'work-experience',
+      label: isKorean ? '경력 사항' : 'Work Experience',
+      icon: Briefcase,
+      required: false
+    },
+    {
+      id: 'education',
+      label: isKorean ? '학력' : 'Education',
+      icon: GraduationCap,
+      required: false
+    },
+    {
+      id: 'certifications',
+      label: isKorean ? '자격증' : 'Certifications',
+      icon: Medal,
+      required: false
+    },
+    {
+      id: 'languages',
+      label: isKorean ? '언어' : 'Languages',
+      icon: Languages,
+      required: false
+    },
+    {
+      id: 'self-introduction',
+      label: isKorean ? '자기소개' : 'Self Introduction',
+      icon: MessageSquare,
+      required: true
+    },
+    {
+      id: 'portfolio-links',
+      label: isKorean ? '포트폴리오 링크' : 'Portfolio Links',
+      icon: Link,
+      required: false
+    }
+  ];
+
   const isPersonalInfoComplete = !!(cv.personalInfo.fullNameEng && cv.personalInfo.email);
   const isSelfIntroComplete = !!(cv.selfIntro.intro && cv.selfIntro.experiences && cv.selfIntro.value && cv.selfIntro.motivation);
 
@@ -109,8 +111,12 @@ const CVSidebar = ({ activeSection, onSectionChange, cv }: CVSidebarProps) => {
   return (
     <div className="w-80 bg-white border-r border-slate-200 p-6">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-2">CV Sections</h2>
-        <p className="text-sm text-slate-600">Complete each section to build your resume</p>
+        <h2 className="text-lg font-semibold text-slate-900 mb-2">
+          {isKorean ? 'CV 섹션' : 'CV Sections'}
+        </h2>
+        <p className="text-sm text-slate-600">
+          {isKorean ? '각 섹션을 완료하여 이력서를 작성하세요' : 'Complete each section to build your resume'}
+        </p>
       </div>
       
       <nav className="space-y-2">
@@ -142,7 +148,9 @@ const CVSidebar = ({ activeSection, onSectionChange, cv }: CVSidebarProps) => {
                   )}
                 </div>
                 {section.required && (
-                  <span className="text-xs text-slate-500">Required</span>
+                  <span className="text-xs text-slate-500">
+                    {isKorean ? '필수' : 'Required'}
+                  </span>
                 )}
               </div>
             </button>
@@ -151,7 +159,9 @@ const CVSidebar = ({ activeSection, onSectionChange, cv }: CVSidebarProps) => {
       </nav>
       
       <div className="mt-8 p-4 bg-slate-50 rounded-lg">
-        <h3 className="text-sm font-medium text-slate-900 mb-2">Completion Status</h3>
+        <h3 className="text-sm font-medium text-slate-900 mb-2">
+          {isKorean ? '완료 상태' : 'Completion Status'}
+        </h3>
         <div className="space-y-1">
           {sections.filter(s => s.required).map(section => (
             <div key={section.id} className="flex items-center justify-between text-xs">
@@ -160,7 +170,10 @@ const CVSidebar = ({ activeSection, onSectionChange, cv }: CVSidebarProps) => {
                 "font-medium",
                 getSectionCompletion(section.id) ? "text-green-600" : "text-amber-600"
               )}>
-                {getSectionCompletion(section.id) ? "Complete" : "Incomplete"}
+                {getSectionCompletion(section.id) ? 
+                  (isKorean ? "완료" : "Complete") : 
+                  (isKorean ? "미완료" : "Incomplete")
+                }
               </span>
             </div>
           ))}
