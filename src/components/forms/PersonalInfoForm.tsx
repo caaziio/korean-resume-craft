@@ -4,8 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Upload, X, Camera } from 'lucide-react';
-import { useRef } from 'react';
+import { Upload, X, Camera, Crop } from 'lucide-react';
+import { useRef, useState } from 'react';
+import PhotoCropper from '@/components/PhotoCropper';
 
 interface PersonalInfoFormProps {
   cv: CV;
@@ -14,6 +15,8 @@ interface PersonalInfoFormProps {
 
 const PersonalInfoForm = ({ cv, onChange }: PersonalInfoFormProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [tempImageSrc, setTempImageSrc] = useState<string>('');
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
 
   const updatePersonalInfo = (field: string, value: string) => {
     const updatedCV = {
@@ -31,23 +34,29 @@ const PersonalInfoForm = ({ cv, onChange }: PersonalInfoFormProps) => {
     if (file) {
       // Check file size (limit to 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size should be less than 5MB');
+        alert(isKorean ? '파일 크기는 5MB 미만이어야 합니다' : 'File size should be less than 5MB');
         return;
       }
       
       // Check file type
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+        alert(isKorean ? '이미지 파일을 선택해주세요' : 'Please select an image file');
         return;
       }
       
       const reader = new FileReader();
       reader.onload = (e) => {
-        const photoData = e.target?.result as string;
-        updatePersonalInfo('photo', photoData);
+        const imageData = e.target?.result as string;
+        setTempImageSrc(imageData);
+        setIsCropperOpen(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCropComplete = (croppedImageData: string) => {
+    updatePersonalInfo('photo', croppedImageData);
+    setTempImageSrc('');
   };
 
   const removePhoto = () => {
@@ -163,7 +172,7 @@ const PersonalInfoForm = ({ cv, onChange }: PersonalInfoFormProps) => {
 
         <div className="space-y-2">
           <Label htmlFor="dob">
-            {isKorean ? '생년월일' : 'Date of Birth'}
+            {isKorean ? '나이' : 'Age'}
           </Label>
           <Input
             id="dob"
@@ -263,6 +272,15 @@ const PersonalInfoForm = ({ cv, onChange }: PersonalInfoFormProps) => {
           }
         </p>
       </div>
+
+      {/* Photo Cropper Dialog */}
+      <PhotoCropper
+        isOpen={isCropperOpen}
+        onClose={() => setIsCropperOpen(false)}
+        imageSrc={tempImageSrc}
+        onCropComplete={handleCropComplete}
+        isKorean={isKorean}
+      />
     </div>
   );
 };

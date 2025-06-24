@@ -65,8 +65,8 @@ const CVPreview = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-korean">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4">
+      {/* Fixed Header */}
+      <div className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <Button
@@ -243,8 +243,11 @@ const CVPreview = () => {
                   {cv.languages.map((lang) => (
                     <div key={lang.id} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                       <h4 className="font-semibold text-slate-900 mb-1">
-                        {lang.language} ({lang.proficiency})
+                        {lang.language}
                       </h4>
+                      <p className="text-xs text-slate-600 mb-1">
+                        ({lang.proficiency})
+                      </p>
                       {lang.score && (
                         <p className="text-sm text-slate-600">{lang.score}</p>
                       )}
